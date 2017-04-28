@@ -1,0 +1,36 @@
+<?php
+
+function cipher_menu(){
+    $items = array();
+    $items['encode'] = array(
+        'title' => 'Encode A Message',
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('encode_form'),
+        'access callback' => TRUE,
+        'type' => MENU_NORMAL_ITEM,
+    );
+  return $items;
+}
+
+function encode_form(){
+    $form['shift_value'] = array(
+        '#title' => 'Shift Value',
+        '#type' => 'textfield',
+        '#description' => t('Enter the amount you want the cipher to shift.'),
+    );
+    $form['shift_direction'] = array(
+        '#title' => 'Shift Direction',
+        '#type' => 'textfield',
+        '#description' => t('Enter the direction you want the cipher to shift, right or left.'),
+    );
+    $form['phrase_to_encode'] = array(
+        '#title' => 'Phrase To Encode',
+        '#type' => 'textfield',
+        '#description' => t('Enter the phrase you wish to encode.'),
+    );
+    $form['submit'] = array(
+        '#type' => 'submit',
+        '#value' => 'Encipher Phrase',
+    );
+    return $form;
+}
