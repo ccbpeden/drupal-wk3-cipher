@@ -9,6 +9,12 @@ function cipher_menu(){
         'access callback' => TRUE,
         'type' => MENU_NORMAL_ITEM,
     );
+    $items['encode_success_page'] = array(
+        'title' => 'Get Your Encoded Message',
+        'page callback' => 'encode_success',
+        'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+    );
   return $items;
 }
 
@@ -34,3 +40,58 @@ function encode_form(){
     );
     return $form;
 }
+
+function encode_form_submit($form, &$form_state){
+    $shift_value = $form_state['values']['shift_value'];
+    $shift_direction = $form_state['values']['shift_direction'];
+    $phrase_to_encode = $form_state['values']['phrase_to_encode'];
+    $phrase_array = str_split($phrase_to_encode);
+    $output_array = array();
+    if($shift_direction == 'left'){
+        foreach($phrase_array as $char){
+            if(!preg_match('/[^a-z0-9]/i', $char)){
+                if ($char === 'A'){
+                  $char = 'Z';
+                  $char = chr(ord($char)-($shift_value+1));
+                } elseif($char === 'a') {
+                  $char = 'z';
+                  $char = chr(ord($char)-($shift_value+1));
+                } else {
+                  $char = chr(ord($char)-$shift_value);
+                }
+            }
+            array_push($output_array, $char);
+        }
+    } else {
+        foreach($phrase_array as $char){
+            if(!preg_match('/[^a-z0-9]/i', $char)){
+                if($char === 'Z'){
+                    $char = 'A';
+                    $char = chr(ord($char)+($shift_value-1));
+                } elseif ($char === 'z'){
+                    $char = 'a';
+                    $char = chr(ord($char)+($shift_value-1));
+                } else {
+                    $char = chr(ord($char)+$shift_value);
+                }
+            }
+            array_push($output_array, $char);
+        }
+    };
+    $_SESSION['encoded_string'] = implode($output_array);
+    $_SESSION['shift_value'] = $shift_value;
+    $_SESSION['shift_direction'] = $shift_direction;
+    $form_state['redirect'] = 'encode_success_page';
+}
+
+function encode_success(){
+    return '<p>Huzzah, you have encoded a phrase with the following keys:<p>
+            <p>Shift Value: '.$_SESSION['shift_value'].'</p>
+            <p>Shift Direction: '.$_SESSION['shift_direction'].'</p>
+            <p>The phrase thus encoded reads:</p>
+            <h3>'.$_SESSION['encoded_string'].'</h3>
+            <p>Keep It Secret, Keep it Safe!</p>';
+}
+// $returned_array = array_merge(array_slice($phrase_array, $shift_value),array_slice($phrase_array, 0, $shift_value));
+// $negative_shift_value = 0 - $shift_value;
+// $returned_array = array_merge(array_slice($phrase_array, $negative_shift_value),array_slice($phrase_array, 0, count($phrase_array)+$negative_shift_value));
