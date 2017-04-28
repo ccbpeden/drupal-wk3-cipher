@@ -106,59 +106,53 @@ function element_validate_no_funky_chars($element){
 }
 
 function encode_form_submit($form, &$form_state){
-    $letters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
     $shift_value = $form_state['values']['shift_value'];
     $shift_direction = $form_state['values']['shift_direction'];
     $phrase_to_encode = $form_state['values']['phrase_to_encode'];
-    $shift_value = (int)$shift_value % 26;
-    for ($index = 0, $length = strlen($phrase_to_encode); $index < $length; $index++) {
-        $char = $phrase_to_encode[$index];
-        if($shift_direction === 'right'){
-            if ($char >= 'a' && $char <= 'z') {
-                $phrase_to_encode[$index] = $letters[(ord($char) - 71 + $shift_value) % 26];
-            } else if ($char >= 'A' && $char <= 'Z') {
-                $phrase_to_encode[$index] = $letters[(ord($char) - 39 + $shift_value) % 26 + 26];
-            }
-        } else {
-            if ($char >= 'a' && $char <= 'z') {
-                $phrase_to_encode[$index] = $letters[(ord($char) - 71 - $shift_value) % 26];
-            } else if ($char >= 'A' && $char <= 'Z') {
-                $phrase_to_encode[$index] = $letters[(ord($char) - 39 - $shift_value) % 26 + 26];
-            }
-        }
-    }
-    $_SESSION['encoded_string'] = $phrase_to_encode;
-    $_SESSION['shift_value'] = $shift_value;
-    $_SESSION['shift_direction'] = $shift_direction;
+    $output = array();
+    $output = encode_decode($shift_value, $shift_direction, $phrase_to_encode);
+    $_SESSION['shift_value'] = $output[0];
+    $_SESSION['shift_direction'] = $output[1];
+    $_SESSION['encoded_string'] = $output[2];
     $form_state['redirect'] = 'encode_success_page';
 }
 
 function decode_form_submit($form, &$form_state){
-    $letters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
     $shift_value = $form_state['values']['shift_value'];
     $shift_direction = $form_state['values']['shift_direction'];
     $phrase_to_decode = $form_state['values']['phrase_to_decode'];
+    $output = array();
+    if ($shift_direction === 'left'){
+        $output = encode_decode($shift_value, 'right', $phrase_to_decode);
+    } else {
+        $output = encode_decode($shift_value, 'left', $phrase_to_decode);
+    }
+    $_SESSION['shift_value'] = $output[0];
+    $_SESSION['shift_direction'] = $output[1];
+    $_SESSION['decoded_string'] = $output[2];
+    $form_state['redirect'] = 'decode_success_page';
+}
+
+function encode_decode($shift_value, $shift_direction, $phrase){
+    $letters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
     $shift_value = (int)$shift_value % 26;
-    for ($index = 0, $length = strlen($phrase_to_decode); $index < $length; $index++) {
-        $char = $phrase_to_decode[$index];
-        if($shift_direction === 'left'){
+    for ($index = 0, $length = strlen($phrase); $index < $length; $index++) {
+        $char = $phrase[$index];
+        if($shift_direction === 'right'){
             if ($char >= 'a' && $char <= 'z') {
-                $phrase_to_decode[$index] = $letters[(ord($char) - 71 + $shift_value) % 26];
+                $phrase[$index] = $letters[(ord($char) - 71 + $shift_value) % 26];
             } else if ($char >= 'A' && $char <= 'Z') {
-                $phrase_to_decode[$index] = $letters[(ord($char) - 39 + $shift_value) % 26 + 26];
+                $phrase[$index] = $letters[(ord($char) - 39 + $shift_value) % 26 + 26];
             }
         } else {
             if ($char >= 'a' && $char <= 'z') {
-                $phrase_to_decode[$index] = $letters[(ord($char) - 71 - $shift_value) % 26];
+                $phrase[$index] = $letters[(ord($char) - 71 - $shift_value) % 26];
             } else if ($char >= 'A' && $char <= 'Z') {
-                $phrase_to_decode[$index] = $letters[(ord($char) - 39 - $shift_value) % 26 + 26];
+                $phrase[$index] = $letters[(ord($char) - 39 - $shift_value) % 26 + 26];
             }
         }
     }
-    $_SESSION['decoded_string'] = $phrase_to_decode;
-    $_SESSION['shift_value'] = $shift_value;
-    $_SESSION['shift_direction'] = $shift_direction;
-    $form_state['redirect'] = 'decode_success_page';
+    return array($shift_value, $shift_direction, $phrase);
 }
 
 function encode_success(){
