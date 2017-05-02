@@ -154,13 +154,13 @@ function encode_decode($shift_value, $shift_direction, $phrase){
             if ($char >= 'a' && $char <= 'z') {
                 $phrase[$index] = $letters[(ord($char) - 71 + $shift_value) % 26];
             } else if ($char >= 'A' && $char <= 'Z') {
-                $phrase[$index] = $letters[(ord($char) - 39 + $shift_value) % 26 + 26];
+                $phrase[$index] = $letters[(ord($char) - 39 + $shift_value) % 26];
             }
         } else {
             if ($char >= 'a' && $char <= 'z') {
                 $phrase[$index] = $letters[(ord($char) - 71 - $shift_value) % 26];
             } else if ($char >= 'A' && $char <= 'Z') {
-                $phrase[$index] = $letters[(ord($char) - 39 - $shift_value) % 26 + 26];
+                $phrase[$index] = $letters[(ord($char) - 39 - $shift_value) % 26];
             }
         }
     }
